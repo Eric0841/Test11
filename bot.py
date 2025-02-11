@@ -71,11 +71,9 @@ def get_roblox_profile_picture(user_id):
 @app_commands.check(is_admin)
 @bot.tree.command(name="게임킥", description="게임 내 특정 플레이어 강퇴")
 async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
-    await interaction.response.defer()
-
-    # Initial embed: Your request is being processed
+    # 바로 응답을 보내기 전에 defer()를 사용하지 않고 직접 메시지를 전송
     embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
-    initial_message = await interaction.followup.send(embed=embed)
+    initial_message = await interaction.response.send_message(embed=embed, ephemeral=True)  # 메시지 보내기
 
     # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
     url = 'https://users.roblox.com/v1/usernames/users'
@@ -95,7 +93,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
         data = response.json()
 
         if 'data' not in data or not data['data']:
-            await initial_message.edit(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.")
+            await initial_message.edit(content=f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.")
             return
 
         theUserId = data['data'][0]['id']
@@ -103,7 +101,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
         avatar_url = data['data'][0].get('avatarUrl', '')  # Get the user’s profile image URL
 
     except Exception as e:
-        await initial_message.edit(f"오류 발생: {str(e)}")
+        await initial_message.edit(content=f"오류 발생: {str(e)}")
         return
 
     # 2️⃣ 강퇴 요청을 처리하는 기본 임베드
@@ -159,6 +157,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
             await initial_message.edit(embed=cancel_embed, view=None)
 
     await initial_message.edit(embed=embed, view=ConfirmView())
+
 
 
 # @app_commands.check(is_admin)
