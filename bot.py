@@ -43,11 +43,11 @@ async def activeusers(interaction: discord.Interaction):
             active_users = data['data'][0].get('playing', '데이터 없음')
             visits = data['data'][0].get('visits', '데이터 없음')
             await interaction.response.send_message(f'현재 활성 유저: {active_users}명\n총 방문자 수: {visits}회')
-            channel = bot.get_channel(998154513192063016)
-            channel2 = bot.get_channel(998154513192063016)
-            if channel and channel2:
-                await channel.edit(name=f'현재 접속자: {active_users}명')
-                await channel2.edit(name=f'총 방문자: {visits}회')
+            # channel = bot.get_channel(998154513192063016)
+            # channel2 = bot.get_channel(998154513192063016)
+            # if channel and channel2:
+            #     await channel.edit(name=f'현재 접속자: {active_users}명')
+            #     await channel2.edit(name=f'총 방문자: {visits}회')
         else:
             await interaction.response.send_message('활성 유저 데이터를 가져오는 데 실패했습니다.')
     except Exception as e:
@@ -123,8 +123,8 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
             'duration': None,  # Duration을 None으로 설정하여 영구적으로 강퇴될 수 있게
             'excludeAltAccounts': False,
             'inherited': True,
-            'privateReason': "게임 내 차단됨",
-            'displayReason': "차단됨"
+            'privateReason': "게임 내 킥 됨",
+            'displayReason': "킥 됨"
         }
     }
 
@@ -397,26 +397,26 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
         await interaction.response.send_message(f'오류가 발생했습니다: {str(error)}')
 
 
-@tasks.loop(minutes=6)  # 6분마다 실행
-async def change_channel_name():
-    channel = bot.get_channel(998154513192063016)
-    channel2 = bot.get_channel(998154513192063016)
-    if channel and channel2:
-        try:
-            response = requests.get(WEB_API_URL)
-            if response.status_code == 200:
-                data = response.json()
-                active_users = data['data'][0].get('playing', '데이터 없음')
-                visits = data['data'][0].get('visits', '데이터 없음')
-                new_name = f"현재 접속자: {active_users}명"
-                await channel.edit(name=new_name)
-                await channel2.edit(name=f'총 방문자: {visits}회')
-            else:
-                print('게임 데이터를 가져오는 데 실패했습니다.')
-        except Exception as e:
-            print(f'오류 발생: {str(e)}')
-    else:
-        print(f'채널을 찾을 수 없습니다.')
+# @tasks.loop(minutes=6)  # 6분마다 실행
+# async def change_channel_name():
+#     channel = bot.get_channel(998154513192063016)
+#     channel2 = bot.get_channel(998154513192063016)
+#     if channel and channel2:
+#         try:
+#             response = requests.get(WEB_API_URL)
+#             if response.status_code == 200:
+#                 data = response.json()
+#                 active_users = data['data'][0].get('playing', '데이터 없음')
+#                 visits = data['data'][0].get('visits', '데이터 없음')
+#                 new_name = f"현재 접속자: {active_users}명"
+#                 await channel.edit(name=new_name)
+#                 await channel2.edit(name=f'총 방문자: {visits}회')
+#             else:
+#                 print('게임 데이터를 가져오는 데 실패했습니다.')
+#         except Exception as e:
+#             print(f'오류 발생: {str(e)}')
+#     else:
+#         print(f'채널을 찾을 수 없습니다.')
 
 
 bot.run(TOKEN)
