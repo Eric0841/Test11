@@ -187,7 +187,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     result = response.json()
 
     if not result["data"]:
-        await initial_message.edit(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.")
+        await initial_message.edit(embed=discord.Embed(title=f'에러?!', description=f'사용자 `{user}`을(를) 찾을 수 없습니다.', color=discord.Color.red()))
         return
 
     user_id = result["data"][0]["id"]
