@@ -152,12 +152,6 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
                 # if response.status_code == 200:
                 # After 1 second, unban the user
-                await asyncio.sleep(10)  # Wait for 1 second
-
-                # Unban the user (assuming the API allows this)
-                unban_payload = {"userId": user_id, "action": "unban"}
-                unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
-
                 success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
                 await initial_message.edit(embed=success_embed, view=None)
 
