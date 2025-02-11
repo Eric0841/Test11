@@ -25,7 +25,7 @@ def is_admin(interaction: discord.Interaction) -> bool:
 @bot.event
 async def on_ready():
     print(f'봇 로그인 완료: {bot.user}')
-    change_channel_name.start()
+    # change_channel_name.start()
     try:
         synced = await bot.tree.sync()
         print(f'동기화된 명령어 개수: {len(synced)} 개')
