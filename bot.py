@@ -71,6 +71,7 @@ def get_roblox_profile_picture(user_id):
 @app_commands.check(is_admin)
 @bot.tree.command(name="게임킥", description="게임 내 특정 플레이어 강퇴")
 async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
+    await interaction.response.defer()
     # 바로 응답을 보내기 전에 defer()를 사용하지 않고 직접 메시지를 전송
     embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
     initial_message = await interaction.followup.send(embed=embed)  # 메시지 보내기
