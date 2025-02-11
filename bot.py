@@ -68,6 +68,109 @@ def get_roblox_profile_picture(user_id):
         return f"Error: {response.status_code}"
 
 
+# @app_commands.check(is_admin)
+# @bot.tree.command(name="게임킥", description="게임 내 특정 플레이어 강퇴")
+# async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
+#     await interaction.response.defer()
+
+#     # Initial embed: Your request is being processed
+#     embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
+#     initial_message = await interaction.followup.send(embed=embed)
+
+#     # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
+#     data = {"usernames": [user], "excludeBannedUsers": False}
+#     response = requests.post(ROBLOX_API_URL, json=data)
+    
+#     result = response.json()
+
+#     if not result["data"]:
+#         await initial_message.edit(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.")
+#         return
+
+#     user_id = result["data"][0]["id"]
+
+#     url = 'https://users.roblox.com/v1/usernames/users'
+#     headers = {
+#         'accept': 'application/json',
+#         'Content-Type': 'application/json',
+#         'x-api-key': ROBLOX_API_KEY,
+#     }
+
+#     payload = {
+#         'usernames': [user],
+#         'excludeBannedUsers': False
+#     }
+
+#     theresponse = requests.post(url, json=payload, headers=headers)
+#     data = theresponse.json()
+
+#     if 'data' not in data or not data['data']:
+#         await initial_message.edit(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
+#         return
+
+#     theUserId = data['data'][0]['id']
+#     user_profile_image = data['data'][0].get('avatarUrl', '')  # Get the user’s profile image URL
+
+#     # 강퇴 요청 API 호출
+#     headers = {
+#         'x-api-key': ROBLOX_API_KEY,
+#         'Content-Type': 'application/json'
+#     }
+
+#     payload = {
+#         'gameJoinRestriction': {
+#             'active': True,
+#             'duration': None,  # Duration을 None으로 설정하여 영구적으로 강퇴될 수 있게
+#             'excludeAltAccounts': False,
+#             'inherited': True,
+#             'privateReason': "게임 내 킥 됨",
+#             'displayReason': "킥 됨"
+#         }
+#     }
+
+#     try:
+#         patch_response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
+
+#         if patch_response.status_code == 200:
+#             # 강퇴가 성공적으로 처리된 경우
+#             profile_url = f"https://www.roblox.com/users/{theUserId}/profile"
+#             avatar_url = get_roblox_profile_picture(theUserId)
+
+#             # 2️⃣ 강퇴 요청을 처리하는 기본 임베드
+#             embed = discord.Embed(
+#                 title="Confirm details",
+#                 description=f"Target User: [{user}]({profile_url}) ({theUserId})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Kick from server\nReason: {reason}",
+#                 color=discord.Color.yellow()
+#             )
+#             embed.set_thumbnail(url=avatar_url)
+
+#             # 3️⃣ Confirm / Cancel 버튼 추가
+#             class ConfirmView(discord.ui.View):
+#                 def __init__(self):
+#                     super().__init__()
+
+#                 @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+#                 async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+#                     # 강퇴 요청이 제대로 되었을 경우의 성공 메시지
+#                     success_embed = discord.Embed(description="Successfully sent request to kick the user.", color=discord.Color.green())
+#                     await initial_message.edit(embed=success_embed, view=None)
+
+#                 @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+#                 async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+#                     cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
+#                     await initial_message.edit(embed=cancel_embed, view=None)
+
+#             # Update the initial message with the confirmation embed and buttons
+#             await initial_message.edit(embed=embed, view=ConfirmView())
+#         else:
+#             await initial_message.edit(f"❌ 강퇴 요청 실패. 상태 코드: {patch_response.status_code}")
+
+#     except Exception as e:
+#         await initial_message.edit(f"오류 발생: {str(e)}")
+
+
+import asyncio
+
 @app_commands.check(is_admin)
 @bot.tree.command(name="게임킥", description="게임 내 특정 플레이어 강퇴")
 async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
@@ -155,6 +258,22 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                     success_embed = discord.Embed(description="Successfully sent request to kick the user.", color=discord.Color.green())
                     await initial_message.edit(embed=success_embed, view=None)
 
+                    # 1초 후에 언밴 처리
+                    await asyncio.sleep(1)
+                    
+                    # Unban (재입장 허용) API 호출
+                    unban_payload = {
+                        'gameJoinRestriction': {
+                            'active': False  # Unban 설정
+                        }
+                    }
+                    unban_response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=unban_payload, headers=headers)
+
+                    if unban_response.status_code == 200:
+                        await initial_message.edit(f"❗ User `{user}` has been unbanned.")
+                    else:
+                        await initial_message.edit(f"❌ Unban failed for user `{user}`. Status code: {unban_response.status_code}")
+
                 @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
                 async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
                     cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
@@ -167,8 +286,6 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
     except Exception as e:
         await initial_message.edit(f"오류 발생: {str(e)}")
-
-
 
 
 
