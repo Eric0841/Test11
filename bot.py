@@ -148,17 +148,17 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
                 if response.status_code == 200:
                     success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
-                    await interaction.followup.send(embed=success_embed, view=None)
+                    await interaction.followup.edit_message()(embed=success_embed, view=None)
                 else:
                     print(response.status_code)
                     # 실패 시 상태 코드 및 응답 내용 출력
                     error_embed = discord.Embed(description=f"Failed to execute request. Status code: {response.status_code}\nResponse: {response.text}", color=discord.Color.red())
-                    await interaction.followup.send(embed=error_embed, view=None)
+                    await interaction.followup.edit_message()(embed=error_embed, view=None)
 
             @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
             async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
                 cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
-                await interaction.followup.send(embed=cancel_embed, view=None)
+                await interaction.followup.edit_message()(embed=cancel_embed, view=None)
 
         await interaction.followup.send(embed=embed, view=ConfirmView())
 
