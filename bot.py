@@ -270,9 +270,11 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                     unban_response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=unban_payload, headers=headers)
 
                     if unban_response.status_code == 200:
-                        await initial_message.edit(f"❗ User `{user}` has been unbanned.")
+                        success_embed = discord.Embed(description=f"❗ User `{user}` has been unbanned.", color=discord.Color.green())
+                        await initial_message.edit(embed=success_embed, view=None)
                     else:
-                        await initial_message.edit(f"❌ Unban failed for user `{user}`. Status code: {unban_response.status_code}")
+                        success_embed = discord.Embed(description=f"❌ Unban failed for user `{user}`. Status code: {unban_response.status_code}", color=discord.Color.green())
+                        await initial_message.edit(embed=success_embed, view=None)
 
                 @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
                 async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
