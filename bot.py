@@ -236,8 +236,8 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
         profile_url = f"https://www.roblox.com/users/{theUserId}/profile"
         avatar_url = get_roblox_profile_picture(theUserId)
         embed = discord.Embed(
-            title="Confirm details",
-            description=f"Target User: [{user}]({profile_url}) ({theUserId})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Kick from server\nReason: {reason}",
+            title="사용자 정보",
+            description=f"유저: [{user}]({profile_url}) ({theUserId})\n체험: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\행위: 서버에서 킥\n사유: {reason}",
             color=discord.Color.yellow()
         )
         embed.set_thumbnail(url=avatar_url)
@@ -247,7 +247,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
             def __init__(self):
                 super().__init__()
     
-            @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+            @discord.ui.button(label="확인", style=discord.ButtonStyle.green)
             async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
                 try:
                     # Confirm 버튼 클릭 시에만 강퇴 요청을 보내도록 함
@@ -282,7 +282,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                 except Exception as e:
                     await initial_message.edit(f"오류 발생: {str(e)}")
     
-            @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+            @discord.ui.button(label="취소", style=discord.ButtonStyle.red)
             async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
                 cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
                 await initial_message.edit(embed=cancel_embed, view=None)
@@ -491,8 +491,8 @@ async def ingameban(interaction: discord.Interaction, username: str, reason: str
     profile_url = f"https://www.roblox.com/users/{theUserId}/profile"
     avatar_url = get_roblox_profile_picture(theUserId)
     embed = discord.Embed(
-        title="Confirm details",
-        description=f"Target User: [{username}]({profile_url}) ({theUserId})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Ban from server\nReason: {reason if reason else '사유 없음'}",
+        title="사용자 정보",
+        description=f"유저: [{username}]({profile_url}) ({theUserId})\n체험: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\n행위: 사용자를 서버에서 차단\n사유: {reason if reason else '사유 없음'}",
         color=discord.Color.red()
     )
     embed.set_thumbnail(url=avatar_url)
@@ -501,7 +501,7 @@ async def ingameban(interaction: discord.Interaction, username: str, reason: str
         def __init__(self):
             super().__init__()
 
-        @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+        @discord.ui.button(label="확인", style=discord.ButtonStyle.green)
         async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
             try:
                 headers = {
@@ -533,7 +533,7 @@ async def ingameban(interaction: discord.Interaction, username: str, reason: str
             except Exception as e:
                 await initial_message.edit(embed=discord.Embed(description=f'오류 발생: {str(e)}', color=discord.Color.red()), view=None)
 
-        @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+        @discord.ui.button(label="취소", style=discord.ButtonStyle.red)
         async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
             cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
             await initial_message.edit(embed=cancel_embed, view=None)
@@ -630,8 +630,8 @@ async def ingameunban(interaction: discord.Interaction, username: str, reason: s
     profile_url = f"https://www.roblox.com/users/{theUserId}/profile"
     avatar_url = get_roblox_profile_picture(theUserId)
     embed = discord.Embed(
-        title="Confirm details",
-        description=f"Target User: [{username}]({profile_url}) ({theUserId})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Unban from server\nReason: {reason if reason else '사유 없음'}",
+        title="사용자 정보",
+        description=f"유저: [{username}]({profile_url}) ({theUserId})\n체험: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\n행위: 유저에게 부여된 밴을 해제\n사유: {reason if reason else '사유 없음'}",
         color=discord.Color.green()
     )
     embed.set_thumbnail(url=avatar_url)
@@ -640,7 +640,7 @@ async def ingameunban(interaction: discord.Interaction, username: str, reason: s
         def __init__(self):
             super().__init__()
 
-        @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+        @discord.ui.button(label="확인", style=discord.ButtonStyle.green)
         async def unban(self, interaction: discord.Interaction, button: discord.ui.Button):
             try:
                 headers = {
@@ -665,7 +665,7 @@ async def ingameunban(interaction: discord.Interaction, username: str, reason: s
             except Exception as e:
                 await initial_message.edit(f'오류 발생: {str(e)}')
 
-        @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+        @discord.ui.button(label="취소", style=discord.ButtonStyle.red)
         async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
             cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
             await initial_message.edit(embed=cancel_embed, view=None)
