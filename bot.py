@@ -53,9 +53,14 @@ async def activeusers(interaction: discord.Interaction):
         await interaction.response.send_message(f'오류 발생: {str(e)}')
 
 @app_commands.check(is_admin)
-@bot.tree.command(name='강퇴', description='게임 내에서 특정 플레이어를 강퇴합니다.')
-async def kick(interaction: discord.Interaction, username: str, reason: str = None):
+@bot.tree.command(name='게임킥', description='게임 내에서 특정 플레이어를 강퇴합니다.')
+async def kick(interaction: discord.Interaction, user: str, reason: str = None):
     await interaction.response.defer()  # 응답 예약
+
+    # Initial embed: Your request is being processed
+    embed = discord.Embed(title="Your request is being processed", description=f"Looking up user {user}...", color=discord.Color.yellow())
+    embed.set_footer(text="Please wait...")
+    initial_message = await interaction.followup.send(embed=embed)
 
     url = 'https://users.roblox.com/v1/usernames/users'
     headers = {
@@ -64,7 +69,7 @@ async def kick(interaction: discord.Interaction, username: str, reason: str = No
     }
 
     payload = {
-        'usernames': [username],
+        'usernames': [user],
         'excludeBannedUsers': False
     }
 
@@ -72,10 +77,11 @@ async def kick(interaction: discord.Interaction, username: str, reason: str = No
     data = theresponse.json()
 
     if 'data' not in data or not data['data']:
-        await interaction.followup.send(f'사용자 `{username}`을(를) 찾을 수 없습니다.')
+        await interaction.followup.send(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
         return
 
     theUserId = data['data'][0]['id']
+    user_profile_image = data['data'][0].get('avatarUrl', '')  # Get the user’s profile image URL
 
     headers = {
         'x-api-key': ROBLOX_API_KEY,
@@ -85,8 +91,6 @@ async def kick(interaction: discord.Interaction, username: str, reason: str = No
     payload = {
         'gameJoinRestriction': {
             'active': True,
-            # 'duration': 60,  # ⚠ 최소값 확인 후 추가!
-            'excludeAltAccounts': False,
             'privateReason': "강퇴됨",
             'displayReason': reason or "강퇴됨"
         }
@@ -94,16 +98,19 @@ async def kick(interaction: discord.Interaction, username: str, reason: str = No
 
     try:
         response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
-        response_data = response.json()  # 응답 데이터 확인
-
         if response.status_code == 200:
-            channel = bot.get_channel(998154513192063016)
-            await interaction.followup.send(f'{username}님이 강퇴되었습니다. 사유: {reason or "사유 없음"}')
-            await channel.send(f'{interaction.user.name}님이 {username}님을 강퇴했습니다. 사유: {reason or "사유 없음"}')
+            # Update embed with user details and action
+            embed = discord.Embed(title="Action Completed", description=f"{user}님이 강퇴되었습니다. 사유: {reason or '사유 없음'}", color=discord.Color.green())
+            embed.add_field(name="Target User", value=f"{user} ({theUserId})")
+            embed.add_field(name="Universe", value="대한재단 [2025](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play)")
+            embed.add_field(name="Action", value="Kick")
+            embed.set_thumbnail(url=user_profile_image)  # Set the profile image of the user
+            await initial_message.edit(embed=embed)
         else:
-            await interaction.followup.send(f'강퇴 실패. 상태 코드: {response.status_code}, 응답: {response_data}')
+            await initial_message.edit(content=f'강퇴 실패. 상태 코드: {response.status_code}')
     except Exception as e:
-        await interaction.followup.send(f'오류 발생: {str(e)}')
+        await initial_message.edit(content=f'오류 발생: {str(e)}')
+
 
 
 @app_commands.check(is_admin)
