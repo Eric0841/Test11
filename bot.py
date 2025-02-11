@@ -11,6 +11,7 @@ import os
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')  # .env에서 Discord Bot Token 불러오기
 ROBLOX_API_KEY = os.getenv('ROBLOX_API_KEY')  # .env에서 Roblox API Key 불러오기
 WEB_API_URL = 'https://games.roblox.com/v1/games?universeIds=7173302102'  # Replace 'id' with your universeId
+ROBLOX_API_URL = "https://users.roblox.com/v1/usernames/users"
 PATCH_API_URL = 'https://apis.roblox.com/cloud/v2/universes/7173302102/user-restrictions/'  # Replace 'id' with your universeId
 
 intents = discord.Intents.default()
