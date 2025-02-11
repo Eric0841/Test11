@@ -70,10 +70,11 @@ def get_roblox_profile_picture(user_id):
 @app_commands.check(is_admin)
 @bot.tree.command(name="게임킥", description="게임 내 특정 플레이어 강퇴")
 async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
-    
+    await interaction.response.defer()
+
     # Initial embed: Your request is being processed
     embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
-    initial_message = await interaction.response.send_message(embed=embed)
+    initial_message = await interaction.followup.send(embed=embed)
 
     # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
     data = {"usernames": [user], "excludeBannedUsers": False}
@@ -81,7 +82,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     result = response.json()
 
     if not result["data"]:
-        await interaction.response.edit_message(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.", ephemeral=True)
+        await interaction.followup.send(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.", ephemeral=True)
         return
 
     user_id = result["data"][0]["id"]
@@ -102,7 +103,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     data = theresponse.json()
 
     if 'data' not in data or not data['data']:
-        await interaction.edit(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
+        await interaction.followup.send(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
         return
 
     theUserId = data['data'][0]['id']
@@ -147,20 +148,20 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
                 if response.status_code == 200:
                     success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
-                    await interaction.response.edit_message(embed=success_embed, view=None)
+                    await interaction.followup.send(embed=success_embed, view=None)
                 else:
                     error_embed = discord.Embed(description="Failed to execute request. Please try again.", color=discord.Color.red())
-                    await interaction.response.edit_message(embed=error_embed, view=None)
+                    await interaction.followup.send(embed=error_embed, view=None)
 
             @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
             async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
                 cancel_embed = discord.Embed(description="❌ Action cancelled.", color=discord.Color.red())
-                await interaction.response.edit_message(embed=cancel_embed, view=None)
+                await interaction.followup.send(embed=cancel_embed, view=None)
 
-        await interaction.response.edit_message(embed=embed, view=ConfirmView())
+        await interaction.followup.send(embed=embed, view=ConfirmView())
 
     except Exception as e:
-        await interaction.response.edit_message(f"오류 발생: {str(e)}", ephemeral=True)
+        await interaction.followup.send(f"오류 발생: {str(e)}", ephemeral=True)
 
 
 @app_commands.check(is_admin)
