@@ -117,7 +117,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     payload = {
         'gameJoinRestriction': {
             'active': True,
-            'duration': duration,
+            'duration': 1,
             'excludeAltAccounts': False,
             'inherited': True,
             'privateReason': "게임 내 차단됨",
