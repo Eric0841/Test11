@@ -119,7 +119,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     payload = {
         'gameJoinRestriction': {
             'active': True,
-            'duration': 0,
+            'duration': 1,
             'excludeAltAccounts': False,
             'inherited': True,
             'privateReason': "게임 내 차단됨",
@@ -153,9 +153,9 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
                 # if response.status_code == 200:
                 # After 1 second, unban the user
-                await asyncio.sleep(1)  # Wait for 1 second
 
-                # Unban the user (assuming the API allows this)
+
+                await asyncio.sleep(1)  # 1초 대기 후
                 unban_payload = {"userId": user_id, "action": "unban"}
                 unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
 
