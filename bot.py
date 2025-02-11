@@ -52,15 +52,40 @@ async def activeusers(interaction: discord.Interaction):
     except Exception as e:
         await interaction.response.send_message(f'오류 발생: {str(e)}')
 
+def get_roblox_profile_picture(user_id):
+    url = f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={user_id}&size=420x420&format=Png&isCircular=false"
+    
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        if "data" in data and data["data"]:
+            image_url = data["data"][0].get("imageUrl", "No image URL found")
+            return image_url
+        else:
+            return "No profile image data found"
+    else:
+        return f"Error: {response.status_code}"
+    
 @app_commands.check(is_admin)
-@bot.tree.command(name='게임킥', description='게임 내에서 특정 플레이어를 강퇴합니다.')
-async def kick(interaction: discord.Interaction, user: str, reason: str = None):
-    await interaction.response.defer()  # 응답 예약
+@bot.tree.command(name="게임킥", description="게임 내 특정 플레이어 강퇴")
+async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
+    await interaction.response.defer()
 
     # Initial embed: Your request is being processed
-    embed = discord.Embed(title="Your request is being processed", description=f"Looking up user {user}...", color=discord.Color.yellow())
-    embed.set_footer(text="Please wait...")
+    embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
     initial_message = await interaction.followup.send(embed=embed)
+
+    # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
+    data = {"usernames": [user], "excludeBannedUsers": False}
+    response = requests.post(ROBLOX_API_URL, json=data)
+    result = response.json()
+
+    if not result["data"]:
+        await initial_message.edit(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.", ephemeral=True)
+        return
+
+    user_id = result["data"][0]["id"]
+
 
     url = 'https://users.roblox.com/v1/usernames/users'
     headers = {
@@ -77,7 +102,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = None):
     data = theresponse.json()
 
     if 'data' not in data or not data['data']:
-        await interaction.followup.send(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
+        await initial_message.edit(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
         return
 
     theUserId = data['data'][0]['id']
@@ -98,19 +123,44 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = None):
 
     try:
         response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
-        if response.status_code == 200:
-            # Update embed with user details and action
-            embed = discord.Embed(title="Action Completed", description=f"{user}님이 강퇴되었습니다. 사유: {reason or '사유 없음'}", color=discord.Color.green())
-            embed.add_field(name="Target User", value=f"{user} ({theUserId})")
-            embed.add_field(name="Universe", value="대한재단 [2025](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play)")
-            embed.add_field(name="Action", value="Kick")
-            embed.set_thumbnail(url=user_profile_image)  # Set the profile image of the user
-            await initial_message.edit(embed=embed)
-        else:
-            await initial_message.edit(content=f'강퇴 실패. 상태 코드: {response.status_code}')
-    except Exception as e:
-        await initial_message.edit(content=f'오류 발생: {str(e)}')
+        print(user_id)
+        profile_url = f"https://www.roblox.com/users/{user_id}/profile"
+            
+        avatar_url = get_roblox_profile_picture(user_id)
 
+
+        # 2️⃣ 강퇴 요청을 처리하는 기본 임베드
+        embed = discord.Embed(title="Confirm details", description=f"Target User: [{user}]({profile_url}) ({user_id})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Kick from server\nReason: {reason}", color=discord.Color.yellow())
+        embed.set_thumbnail(url=avatar_url)
+
+        # 3️⃣ Confirm / Cancel 버튼 추가
+        class ConfirmView(discord.ui.View):
+            def __init__(self):
+                super().__init__()
+
+            @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+            async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+                # 강퇴 요청 API 호출
+                headers = {"Content-Type": "application/json"}
+                payload = {"userId": user, "action": "kick", "reason": reason}
+                response = requests.patch(PATCH_API_URL, json=payload, headers=headers)
+
+                if response.status_code == 200:
+                    success_embed = discord.Embed(description="✅ Successfully sent request to servers to execute your request!", color=discord.Color.green())
+                    await initial_message.edit(embed=success_embed, view=None)
+                else:
+                    error_embed = discord.Embed(description="❌ Failed to execute request. Please try again.", color=discord.Color.red())
+                    await initial_message.edit(embed=error_embed, view=None)
+
+            @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+            async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+                cancel_embed = discord.Embed(description="❌ Action cancelled.", color=discord.Color.red())
+                await initial_message.edit(embed=cancel_embed, view=None)
+
+        await initial_message.edit(embed=embed, view=ConfirmView())
+
+    except Exception as e:
+        await initial_message.edit(f"오류 발생: {str(e)}", ephemeral=True)
 
 
 @app_commands.check(is_admin)
