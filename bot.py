@@ -6,7 +6,7 @@ from datetime import datetime
 from typing import Optional
 import json
 import os
-
+import asyncio
 
 TOKEN = os.getenv('DISCORD_BOT_TOKEN')  # .env에서 Discord Bot Token 불러오기
 ROBLOX_API_KEY = os.getenv('ROBLOX_API_KEY')  # .env에서 Roblox API Key 불러오기
@@ -150,10 +150,24 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                 response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
 
                 if response.status_code == 200:
+                    # After 1 second, unban the user
+                    await asyncio.sleep(1)  # Wait for 1 second
+    
+                    # Unban the user (assuming the API allows this)
+                    unban_payload = {"userId": user_id, "action": "unban"}
+                    unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
+
                     success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
                     await initial_message.edit(embed=success_embed, view=None)
                 else:
                     print(response.status_code)
+                    # After 1 second, unban the user
+                    await asyncio.sleep(1)  # Wait for 1 second
+    
+                    # Unban the user (assuming the API allows this)
+                    unban_payload = {"userId": user_id, "action": "unban"}
+                    unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
+
                     # 실패 시 상태 코드 및 응답 내용 출력
                     error_embed = discord.Embed(description=f"Failed to execute request. Status code: {response.status_code}\nResponse: {response.text}", color=discord.Color.red())
                     await initial_message.edit(embed=error_embed, view=None)
