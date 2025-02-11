@@ -92,6 +92,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     headers = {
         'accept': 'application/json',
         'Content-Type': 'application/json',
+        'x-api-key': ROBLOX_API_KEY,
     }
 
     payload = {
