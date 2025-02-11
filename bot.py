@@ -70,8 +70,7 @@ def get_roblox_profile_picture(user_id):
 @app_commands.check(is_admin)
 @bot.tree.command(name="게임킥", description="게임 내 특정 플레이어 강퇴")
 async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
-    await interaction.response.defer()
-
+    
     # Initial embed: Your request is being processed
     embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
     initial_message = await interaction.response.send_message(embed=embed)
