@@ -269,12 +269,12 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                         }
                         unban_response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=unban_payload, headers=headers)
     
-                        if unban_response.status_code == 200:
-                            success_embed = discord.Embed(description=f"❗ User `{user}` has been unbanned.", color=discord.Color.green())
-                            await initial_message.edit(embed=success_embed, view=None)
-                        else:
-                            success_embed = discord.Embed(description=f"❌ Unban failed for user `{user}`. Status code: {unban_response.status_code}", color=discord.Color.green())
-                            await initial_message.edit(embed=success_embed, view=None)
+                        # if unban_response.status_code == 200:
+                        #     success_embed = discord.Embed(description=f"❗ User `{user}` has been unbanned.", color=discord.Color.green())
+                        #     await initial_message.edit(embed=success_embed, view=None)
+                        # else:
+                        #     success_embed = discord.Embed(description=f"❌ Unban failed for user `{user}`. Status code: {unban_response.status_code}", color=discord.Color.green())
+                        #     await initial_message.edit(embed=success_embed, view=None)
                     else:
                         error_embed = discord.Embed(description=f"❌ Kick request failed. Status code: {patch_response.status_code}", color=discord.Color.red())
                         await initial_message.edit(embed=error_embed, view=None)
