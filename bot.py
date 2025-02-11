@@ -163,7 +163,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
         await interaction.followup.edit_message(embed=embed, view=ConfirmView())
 
     except Exception as e:
-        await interaction.followup.edit_message(f"오류 발생: {str(e)}", ephemeral=True)
+        await interaction.followup.edit_message(f"오류 발생: {str(e)}")
 
 
 @app_commands.check(is_admin)
