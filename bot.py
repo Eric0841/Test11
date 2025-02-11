@@ -152,7 +152,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
                 # if response.status_code == 200:
                 # After 1 second, unban the user
-                await asyncio.sleep(1)  # Wait for 1 second
+                await asyncio.sleep(10)  # Wait for 1 second
 
                 # Unban the user (assuming the API allows this)
                 unban_payload = {"userId": user_id, "action": "unban"}
