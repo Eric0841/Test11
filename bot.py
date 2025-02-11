@@ -111,6 +111,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     theUserId = data['data'][0]['id']
     user_profile_image = data['data'][0].get('avatarUrl', '')  # Get the user’s profile image URL
 
+    # 강퇴 요청 API 호출
     headers = {
         'x-api-key': ROBLOX_API_KEY,
         'Content-Type': 'application/json'
@@ -119,7 +120,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     payload = {
         'gameJoinRestriction': {
             'active': True,
-            'duration': 1,
+            'duration': None,  # Duration을 None으로 설정하여 영구적으로 강퇴될 수 있게
             'excludeAltAccounts': False,
             'inherited': True,
             'privateReason': "게임 내 차단됨",
@@ -128,43 +129,45 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     }
 
     try:
-        response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
-        print(user_id)
-        profile_url = f"https://www.roblox.com/users/{user_id}/profile"
-            
-        avatar_url = get_roblox_profile_picture(user_id)
+        patch_response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
 
-        # 2️⃣ 강퇴 요청을 처리하는 기본 임베드
-        embed = discord.Embed(title="Confirm details", description=f"Target User: [{user}]({profile_url}) ({user_id})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Kick from server\nReason: {reason}", color=discord.Color.yellow())
-        embed.set_thumbnail(url=avatar_url)
-        
-        # 3️⃣ Confirm / Cancel 버튼 추가
-        class ConfirmView(discord.ui.View):
-            def __init__(self):
-                super().__init__()
+        if patch_response.status_code == 200:
+            # 강퇴가 성공적으로 처리된 경우
+            profile_url = f"https://www.roblox.com/users/{theUserId}/profile"
+            avatar_url = get_roblox_profile_picture(theUserId)
 
-            @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
-            async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
-                # 강퇴 요청 API 호출
-                headers = {"Content-Type": "application/json"}
-                payload = {"userId": user, "action": "kick", "reason": reason}
-                response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
+            # 2️⃣ 강퇴 요청을 처리하는 기본 임베드
+            embed = discord.Embed(
+                title="Confirm details",
+                description=f"Target User: [{user}]({profile_url}) ({theUserId})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Kick from server\nReason: {reason}",
+                color=discord.Color.yellow()
+            )
+            embed.set_thumbnail(url=avatar_url)
 
-                # if response.status_code == 200:
-                # After 1 second, unban the user
-                success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
-                await initial_message.edit(embed=success_embed, view=None)
+            # 3️⃣ Confirm / Cancel 버튼 추가
+            class ConfirmView(discord.ui.View):
+                def __init__(self):
+                    super().__init__()
 
-            @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
-            async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-                cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
-                await initial_message.edit(embed=cancel_embed, view=None)
+                @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+                async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
+                    # 강퇴 요청이 제대로 되었을 경우의 성공 메시지
+                    success_embed = discord.Embed(description="Successfully sent request to kick the user.", color=discord.Color.green())
+                    await initial_message.edit(embed=success_embed, view=None)
 
-        # Update the initial message with the confirmation embed and buttons
-        await initial_message.edit(embed=embed, view=ConfirmView())
+                @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+                async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+                    cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
+                    await initial_message.edit(embed=cancel_embed, view=None)
+
+            # Update the initial message with the confirmation embed and buttons
+            await initial_message.edit(embed=embed, view=ConfirmView())
+        else:
+            await initial_message.edit(f"❌ 강퇴 요청 실패. 상태 코드: {patch_response.status_code}")
 
     except Exception as e:
         await initial_message.edit(f"오류 발생: {str(e)}")
+
 
 
 
