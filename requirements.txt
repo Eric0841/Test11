@@ -2,5 +2,4 @@ discord.py
 requests
 datetime
 typing
-json
 os
