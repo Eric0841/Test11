@@ -79,6 +79,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
     data = {"usernames": [user], "excludeBannedUsers": False}
     response = requests.post(ROBLOX_API_URL, json=data)
+    
     result = response.json()
 
     if not result["data"]:
@@ -142,41 +143,34 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
         class ConfirmView(discord.ui.View):
             def __init__(self):
                 super().__init__()
-
+        
             @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
             async def confirm(self, interaction: discord.Interaction, button: discord.ui.Button):
                 # 강퇴 요청 API 호출
                 headers = {"Content-Type": "application/json"}
-                payload = {"userId": user, "action": "kick", "reason": reason}
+                
+                # Modify the payload to indicate the "kick" action
+                payload = {
+                    "userId": theUserId,  # Make sure you're using the correct user ID
+                    "action": "kick",     # Change this to "kick" instead of "ban"
+                    "reason": reason
+                }
+        
                 response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
-
+        
                 if response.status_code == 200:
-                    # After 1 second, unban the user
-                    await asyncio.sleep(1)  # Wait for 1 second
-    
-                    # Unban the user (assuming the API allows this)
-                    unban_payload = {"userId": user_id, "action": "unban"}
-                    unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
-
-                    success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
+                    success_embed = discord.Embed(description="Successfully sent request to kick the user!", color=discord.Color.green())
                     await initial_message.edit(embed=success_embed, view=None)
                 else:
-                    print(response.status_code)
-                    # After 1 second, unban the user
-                    await asyncio.sleep(1)  # Wait for 1 second
-    
-                    # Unban the user (assuming the API allows this)
-                    unban_payload = {"userId": user_id, "action": "unban"}
-                    unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
-
                     # 실패 시 상태 코드 및 응답 내용 출력
                     error_embed = discord.Embed(description=f"Failed to execute request. Status code: {response.status_code}\nResponse: {response.text}", color=discord.Color.red())
                     await initial_message.edit(embed=error_embed, view=None)
-
+        
             @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
             async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
                 cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
                 await initial_message.edit(embed=cancel_embed, view=None)
+
 
         await initial_message.edit(embed=embed, view=ConfirmView())
 
