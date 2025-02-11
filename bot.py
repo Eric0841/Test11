@@ -55,6 +55,8 @@ async def activeusers(interaction: discord.Interaction):
 @app_commands.check(is_admin)
 @bot.tree.command(name='강퇴', description='게임 내에서 특정 플레이어를 강퇴합니다.')
 async def kick(interaction: discord.Interaction, username: str, reason: str = None):
+    await interaction.response.defer()  # 응답 예약
+
     url = 'https://users.roblox.com/v1/usernames/users'
     headers = {
         'accept': 'application/json',
@@ -70,19 +72,20 @@ async def kick(interaction: discord.Interaction, username: str, reason: str = No
     data = theresponse.json()
 
     if 'data' not in data or not data['data']:
-        await interaction.response.send_message(f'사용자 `{username}`을(를) 찾을 수 없습니다.')
+        await interaction.followup.send(f'사용자 `{username}`을(를) 찾을 수 없습니다.')
         return
 
     theUserId = data['data'][0]['id']
 
     headers = {
         'x-api-key': ROBLOX_API_KEY,
+        'Content-Type': 'application/json'
     }
 
     payload = {
         'gameJoinRestriction': {
             'active': True,
-            'duration': 1,  # ⏳ 1초 동안 강제 퇴장
+            # 'duration': 60,  # ⚠ 최소값 확인 후 추가!
             'excludeAltAccounts': False,
             'privateReason': "강퇴됨",
             'displayReason': reason or "강퇴됨"
@@ -91,14 +94,17 @@ async def kick(interaction: discord.Interaction, username: str, reason: str = No
 
     try:
         response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
+        response_data = response.json()  # 응답 데이터 확인
+
         if response.status_code == 200:
             channel = bot.get_channel(998154513192063016)
-            await interaction.response.send_message(f'{username}님이 강퇴되었습니다. 사유: {reason or "사유 없음"}')
+            await interaction.followup.send(f'{username}님이 강퇴되었습니다. 사유: {reason or "사유 없음"}')
             await channel.send(f'{interaction.user.name}님이 {username}님을 강퇴했습니다. 사유: {reason or "사유 없음"}')
         else:
-            await interaction.response.send_message(f'강퇴 실패. 상태 코드: {response.status_code}')
+            await interaction.followup.send(f'강퇴 실패. 상태 코드: {response.status_code}, 응답: {response_data}')
     except Exception as e:
-        await interaction.response.send_message(f'오류 발생: {str(e)}')
+        await interaction.followup.send(f'오류 발생: {str(e)}')
+
 
 @app_commands.check(is_admin)
 @bot.tree.command(name='게임밴', description='게임 내에서 특정 플레이어를 차단합니다.')
