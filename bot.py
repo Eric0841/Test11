@@ -82,7 +82,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     result = response.json()
 
     if not result["data"]:
-        await initial_message.edit(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.", ephemeral=True)
+        await interaction.response.edit_message(f"❌ `{user}` 닉네임을 가진 사용자를 찾을 수 없습니다.", ephemeral=True)
         return
 
     user_id = result["data"][0]["id"]
@@ -103,7 +103,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     data = theresponse.json()
 
     if 'data' not in data or not data['data']:
-        await initial_message.edit(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
+        await interaction.response.edit_message(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
         return
 
     theUserId = data['data'][0]['id']
@@ -148,20 +148,20 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
                 if response.status_code == 200:
                     success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
-                    await initial_message.edit(embed=success_embed, view=None)
+                    await interaction.edit(embed=success_embed, view=None)
                 else:
                     error_embed = discord.Embed(description="Failed to execute request. Please try again.", color=discord.Color.red())
-                    await initial_message.edit(embed=error_embed, view=None)
+                    await interaction.edit(embed=error_embed, view=None)
 
             @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
             async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
                 cancel_embed = discord.Embed(description="❌ Action cancelled.", color=discord.Color.red())
-                await initial_message.edit(embed=cancel_embed, view=None)
+                await interaction.edit(embed=cancel_embed, view=None)
 
-        await initial_message.edit(embed=embed, view=ConfirmView())
+        await interaction.response.edit_message(embed=embed, view=ConfirmView())
 
     except Exception as e:
-        await initial_message.edit(f"오류 발생: {str(e)}", ephemeral=True)
+        await nteraction.response.edit_message(f"오류 발생: {str(e)}", ephemeral=True)
 
 
 @app_commands.check(is_admin)
