@@ -73,7 +73,7 @@ def get_roblox_profile_picture(user_id):
 async def kick(interaction: discord.Interaction, user: str, reason: str = "No reason provided"):
     # 바로 응답을 보내기 전에 defer()를 사용하지 않고 직접 메시지를 전송
     embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
-    initial_message = await interaction.response.send_message(embed=embed)  # 메시지 보내기
+    initial_message = await interaction.followup.send(embed=embed, ephemeral=True)  # 메시지 보내기
 
     # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
     url = 'https://users.roblox.com/v1/usernames/users'
