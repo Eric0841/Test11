@@ -140,6 +140,17 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                 if patch_response.status_code == 200:
                     success_embed = discord.Embed(description="Successfully sent request to kick the user.", color=discord.Color.green())
                     await initial_message.edit(embed=success_embed, view=None)
+
+                    # 2️⃣ 1초 뒤에 언밴 요청 보내기
+                    await asyncio.sleep(1)  # 1초 대기
+
+                    unban_payload = {
+                        'gameJoinRestriction': {
+                            'active': False  # 강퇴를 취소하려면 active를 False로 설정
+                        }
+                    }
+
+                    unban_response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=unban_payload, headers=headers)
                 else:
                     error_embed = discord.Embed(
                         description=f"Failed to kick user. Status code: {patch_response.status_code}\n{patch_response.text}",
