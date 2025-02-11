@@ -115,7 +115,6 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     #     'x-api-key': ROBLOX_API_KEY,
     #     'Content-Type': 'application/json'
     # }
-
     headers = {
         'x-api-key': ROBLOX_API_KEY,
     }
@@ -123,13 +122,16 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     payload = {
         'gameJoinRestriction': {
             'active': True,
-            'duration': 1,
+            'duration': duration,
             'excludeAltAccounts': False,
             'inherited': True,
-            'privateReason': "게임 내 차단됨",
-            'displayReason': "차단됨"
+            'privateReason': "게임 내 킥 됨",
+            'displayReason': "게임에서 킥 당했습니다!"
         }
     }
+
+    if reason is None:
+        reason = "사유 없음"
 
     try:
         response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
@@ -156,21 +158,10 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                 response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
 
                 if response.status_code == 200:
-                    await asyncio.sleep(1)  # 1초 대기 후
-                    unban_payload = {"userId": user_id, "action": "unban"}
-                    unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
-
                     success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
                     await initial_message.edit(embed=success_embed, view=None)
                 else:
                     print(response.status_code)
-                    # After 1 second, unban the user
-                    await asyncio.sleep(1)  # Wait for 1 second
-    
-                    # Unban the user (assuming the API allows this)
-                    unban_payload = {"userId": user_id, "action": "unban"}
-                    unban_response = requests.patch(f'{PATCH_API_URL}{user_id}', json=unban_payload, headers=headers)
-
                     # 실패 시 상태 코드 및 응답 내용 출력
                     error_embed = discord.Embed(description=f"Failed to execute request. Status code: {response.status_code}\nResponse: {response.text}", color=discord.Color.red())
                     await initial_message.edit(embed=error_embed, view=None)
