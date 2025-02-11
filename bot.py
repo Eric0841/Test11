@@ -42,14 +42,14 @@ async def activeusers(interaction: discord.Interaction):
             data = response.json()
             active_users = data['data'][0].get('playing', '데이터 없음')
             visits = data['data'][0].get('visits', '데이터 없음')
-            await interaction.response.send_message(f'현재 활성 유저: {active_users}명\n총 방문자 수: {visits}회')
+            await interaction.response.send_message(embed=discord.Embed(title=f'현재 활성 유저', description=f'실시간 유저: {active_users}명\n총 방문자 수: {visits}회', color=discord.Color.green()))
             # channel = bot.get_channel(998154513192063016)
             # channel2 = bot.get_channel(998154513192063016)
             # if channel and channel2:
             #     await channel.edit(name=f'현재 접속자: {active_users}명')
             #     await channel2.edit(name=f'총 방문자: {visits}회')
         else:
-            await interaction.response.send_message('활성 유저 데이터를 가져오는 데 실패했습니다.')
+            await interaction.response.send_message(embed=discord.Embed(title=f'에러?!', description=f'활성 유저 데이터를 가져오는 데 실패했습니다.', color=discord.Color.red()))
     except Exception as e:
         await interaction.response.send_message(f'오류 발생: {str(e)}')
 
@@ -157,7 +157,7 @@ def get_roblox_profile_picture(user_id):
 
 #                 @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
 #                 async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-#                     cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
+#                     cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
 #                     await initial_message.edit(embed=cancel_embed, view=None)
 
 #             # Update the initial message with the confirmation embed and buttons
@@ -177,7 +177,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     await interaction.response.defer()
 
     # Initial embed: Your request is being processed
-    embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
+    embed = discord.Embed(description=f"귀하의 요청이 처리 중입니다.", color=discord.Color.yellow())
     initial_message = await interaction.followup.send(embed=embed)
 
     # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
@@ -208,7 +208,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     data = theresponse.json()
 
     if 'data' not in data or not data['data']:
-        await initial_message.edit(f'사용자 `{user}`을(를) 찾을 수 없습니다.')
+        await initial_message.edit(embed=discord.Embed(title=f'에러?!', description=f'사용자 `{username}`을(를) 찾을 수 없습니다.', color=discord.Color.red()))
         return
 
     theUserId = data['data'][0]['id']
@@ -255,7 +255,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     
                     if patch_response.status_code == 200:
                         # 강퇴 요청이 성공적일 경우
-                        success_embed = discord.Embed(description="Successfully sent request to kick the user.", color=discord.Color.green())
+                        success_embed = discord.Embed(description="사용자를 서버에서 킥 하는 요청을 성공적으로 보냈습니다.", color=discord.Color.green())
                         await initial_message.edit(embed=success_embed, view=None)
     
                         # 1초 후에 언밴 처리
@@ -276,7 +276,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                         #     success_embed = discord.Embed(description=f"❌ Unban failed for user `{user}`. Status code: {unban_response.status_code}", color=discord.Color.green())
                         #     await initial_message.edit(embed=success_embed, view=None)
                     else:
-                        error_embed = discord.Embed(description=f"❌ Kick request failed. Status code: {patch_response.status_code}", color=discord.Color.red())
+                        error_embed = discord.Embed(description=f"❌ 킥 요청이 실패했습니다. 상태 코드: {patch_response.status_code}", color=discord.Color.red())
                         await initial_message.edit(embed=error_embed, view=None)
     
                 except Exception as e:
@@ -284,7 +284,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
     
             @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
             async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-                cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
+                cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
                 await initial_message.edit(embed=cancel_embed, view=None)
     
         # Update the initial message with the confirmation embed and buttons
@@ -396,7 +396,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
 #             @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
 #             async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-#                 cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
+#                 cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
 #                 await initial_message.edit(embed=cancel_embed, view=None)
 
 #         await initial_message.edit(embed=embed, view=ConfirmView())
@@ -463,7 +463,7 @@ async def ingameban(interaction: discord.Interaction, username: str, reason: str
     await interaction.response.defer()
 
     # Initial embed: Your request is being processed
-    embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
+    embed = discord.Embed(description=f"귀하의 요청이 처리 중입니다.", color=discord.Color.yellow())
     initial_message = await interaction.followup.send(embed=embed)
 
     url = 'https://users.roblox.com/v1/usernames/users'
@@ -481,7 +481,7 @@ async def ingameban(interaction: discord.Interaction, username: str, reason: str
     data = theresponse.json()
 
     if 'data' not in data or not data['data']:
-        await initial_message.edit(f'사용자 `{username}`을(를) 찾을 수 없습니다.')
+        await initial_message.edit(embed=discord.Embed(title=f'에러?!', description=f'사용자 `{username}`을(를) 찾을 수 없습니다.', color=discord.Color.red()))
         return
 
     theUserId = data['data'][0]['id']
@@ -535,7 +535,7 @@ async def ingameban(interaction: discord.Interaction, username: str, reason: str
 
         @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
         async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
-            cancel_embed = discord.Embed(description="Action cancelled.", color=discord.Color.red())
+            cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
             await initial_message.edit(embed=cancel_embed, view=None)
 
     # Update the initial message with the confirmation embed and buttons
@@ -551,16 +551,66 @@ async def on_application_command_error(interaction: discord.Interaction, error: 
         await interaction.response.send_message(f'오류 발생: {str(error)}')
 
 
+# @app_commands.check(is_admin)
+# @bot.tree.command(name='게임밴해제', description='게임 내에서 플레이어 차단 해제 (관리자만 실행 가능)')
+# async def ingameunban(interaction: discord.Interaction, username: str, reason: str = None):
+#     url = 'https://users.roblox.com/v1/usernames/users'
+#     headers = {
+#         'accept': 'application/json',
+#         'Content-Type': 'application/json',
+#     }
+
+#     # 요청 데이터 정의
+#     payload = {
+#         'usernames': [username],
+#         'excludeBannedUsers': False
+#     }
+
+#     theresponse = requests.post(url, json=payload, headers=headers)
+#     data = theresponse.json()
+
+#     theUserId = data['data'][0]['id']
+
+#     headers = {
+#         'x-api-key': ROBLOX_API_KEY,  # 필요 시 API 키 변경
+#     }
+#     payload = {
+#         'gameJoinRestriction':
+#             {
+#                 'active': False
+#             }
+#     }
+
+#     if reason is None:
+#         reason = "사유 없음"
+
+#     try:
+#         response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
+#         if response.status_code == 200:
+#             channel = bot.get_channel(998154513192063016)
+#             await interaction.response.send_message(f'{username}님의 차단이 해제되었습니다. 관리 사유: {reason}')
+#             await channel.send(f'{interaction.user.name}님이 {username}님의 차단을 해제했습니다. 관리 사유: {reason}')
+#         else:
+#             await interaction.response.send_message(f'플레이어 차단 해제 실패. 상태 코드: {response.status_code}')
+#     except Exception as e:
+#         await interaction.response.send_message(f'오류 발생: {str(e)}')
+
+
 @app_commands.check(is_admin)
-@bot.tree.command(name='게임밴해제', description='게임 내에서 플레이어 차단 해제 (관리자만 실행 가능)')
+@bot.tree.command(name='게임밴해제', description='게임 내에서 플레이어 차단 해제')
 async def ingameunban(interaction: discord.Interaction, username: str, reason: str = None):
+    await interaction.response.defer()
+
+    # Initial embed: Your request is being processed
+    embed = discord.Embed(description=f"귀하의 요청이 처리 중입니다.", color=discord.Color.yellow())
+    initial_message = await interaction.followup.send(embed=embed)
+    
     url = 'https://users.roblox.com/v1/usernames/users'
     headers = {
         'accept': 'application/json',
         'Content-Type': 'application/json',
     }
 
-    # 요청 데이터 정의
     payload = {
         'usernames': [username],
         'excludeBannedUsers': False
@@ -569,31 +619,60 @@ async def ingameunban(interaction: discord.Interaction, username: str, reason: s
     theresponse = requests.post(url, json=payload, headers=headers)
     data = theresponse.json()
 
+    if 'data' not in data or not data['data']:
+        await initial_message.edit(embed=discord.Embed(title=f'에러?!', description=f'사용자 `{username}`을(를) 찾을 수 없습니다.', color=discord.Color.red()))
+        return
+
     theUserId = data['data'][0]['id']
+    user_profile_image = data['data'][0].get('avatarUrl', '')  # Get the user’s profile image URL
 
-    headers = {
-        'x-api-key': ROBLOX_API_KEY,  # 필요 시 API 키 변경
-    }
-    payload = {
-        'gameJoinRestriction':
-            {
-                'active': False
-            }
-    }
+    # 기본 임베드 설정
+    profile_url = f"https://www.roblox.com/users/{theUserId}/profile"
+    avatar_url = get_roblox_profile_picture(theUserId)
+    embed = discord.Embed(
+        title="Confirm details",
+        description=f"Target User: [{username}]({profile_url}) ({theUserId})\nUniverse: [대한재단](https://www.roblox.com/games/95455103629227/2025#ropro-quick-play) (95455103629227)\n\nAction: Unban from server\nReason: {reason if reason else '사유 없음'}",
+        color=discord.Color.green()
+    )
+    embed.set_thumbnail(url=avatar_url)
 
-    if reason is None:
-        reason = "사유 없음"
+    class ConfirmView(discord.ui.View):
+        def __init__(self):
+            super().__init__()
 
-    try:
-        response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
-        if response.status_code == 200:
-            channel = bot.get_channel(998154513192063016)
-            await interaction.response.send_message(f'{username}님의 차단이 해제되었습니다. 관리 사유: {reason}')
-            await channel.send(f'{interaction.user.name}님이 {username}님의 차단을 해제했습니다. 관리 사유: {reason}')
-        else:
-            await interaction.response.send_message(f'플레이어 차단 해제 실패. 상태 코드: {response.status_code}')
-    except Exception as e:
-        await interaction.response.send_message(f'오류 발생: {str(e)}')
+        @discord.ui.button(label="Confirm", style=discord.ButtonStyle.green)
+        async def unban(self, interaction: discord.Interaction, button: discord.ui.Button):
+            try:
+                headers = {
+                    'x-api-key': ROBLOX_API_KEY,
+                }
+
+                payload = {
+                    'gameJoinRestriction': {
+                        'active': False  # Lifting the ban
+                    }
+                }
+
+                response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
+
+                if response.status_code == 200:
+                    channel = bot.get_channel(998154513192063016)  # Adjust to your channel ID
+                    await initial_message.edit(embed=discord.Embed(description=f'{username}님의 차단이 해제되었습니다. 사유: {reason if reason else "사유 없음"}', color=discord.Color.green()), view=None)
+                    await channel.send(f'{interaction.user.name}님이 {username}님의 차단을 해제했습니다. 사유: {reason if reason else "사유 없음"}')
+                else:
+                    await initial_message.edit(f'차단 해제 실패. 상태 코드: {response.status_code}')
+
+            except Exception as e:
+                await initial_message.edit(f'오류 발생: {str(e)}')
+
+        @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
+        async def cancel(self, interaction: discord.Interaction, button: discord.ui.Button):
+            cancel_embed = discord.Embed(description="작업 취소됨.", color=discord.Color.red())
+            await initial_message.edit(embed=cancel_embed, view=None)
+
+    # Update the initial message with the confirmation embed and buttons
+    await initial_message.edit(embed=embed, view=ConfirmView())
+
 
 async def ingameban_error(interaction: discord.Interaction, error):
     if isinstance(error, commands.MissingRole):
