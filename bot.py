@@ -74,7 +74,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
 
     # Initial embed: Your request is being processed
     embed = discord.Embed(description=f"Your request is being processed", color=discord.Color.yellow())
-    initial_message = await interaction.followup.send(embed=embed)
+    initial_message = await interaction.response.send_message(embed=embed)
 
     # 1️⃣ 유저 이름으로 ID 가져오기 (Roblox API)
     data = {"usernames": [user], "excludeBannedUsers": False}
@@ -147,10 +147,10 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                 response = requests.patch(f'{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
 
                 if response.status_code == 200:
-                    success_embed = discord.Embed(description="✅ Successfully sent request to servers to execute your request!", color=discord.Color.green())
+                    success_embed = discord.Embed(description="Successfully sent request to servers to execute your request!", color=discord.Color.green())
                     await initial_message.edit(embed=success_embed, view=None)
                 else:
-                    error_embed = discord.Embed(description="❌ Failed to execute request. Please try again.", color=discord.Color.red())
+                    error_embed = discord.Embed(description="Failed to execute request. Please try again.", color=discord.Color.red())
                     await initial_message.edit(embed=error_embed, view=None)
 
             @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
