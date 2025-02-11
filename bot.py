@@ -144,7 +144,7 @@ async def kick(interaction: discord.Interaction, user: str, reason: str = "No re
                 # 강퇴 요청 API 호출
                 headers = {"Content-Type": "application/json"}
                 payload = {"userId": user, "action": "kick", "reason": reason}
-                response = requests.patch({PATCH_API_URL}{theUserId}, json=payload, headers=headers)
+                response = requests.patch('{PATCH_API_URL}{theUserId}', json=payload, headers=headers)
 
                 if response.status_code == 200:
                     success_embed = discord.Embed(description="✅ Successfully sent request to servers to execute your request!", color=discord.Color.green())
